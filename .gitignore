@@ -1,0 +1,32 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# SQLite database files (if added later)
+*.sqlite3
+
+# Uploaded files (if you create uploads folder later)
+uploads/
+
+# spaCy cache
+.spacy/
+
+# Environment Variables
+.env
