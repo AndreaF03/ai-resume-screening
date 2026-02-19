@@ -22,3 +22,10 @@ Deployed on Render.
 ##  Run Locally
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+
+##  Upgrade v2.0 – Semantic AI Version
+
+New Features:
+- Sentence Embedding Similarity (MiniLM)
+- Skill Gap Detection
+- Improved Ranking Accuracy

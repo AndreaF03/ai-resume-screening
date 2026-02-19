@@ -3,29 +3,35 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 import pdfplumber
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import os
+
+# Import BOTH functions
+from app.ai_engine import semantic_similarity, skill_gap
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
+
+# Define required skills globally
+REQUIRED_SKILLS = ["python", "machine learning", "sql"]
+
 
 def extract_text_from_pdf(file):
     text = ""
     with pdfplumber.open(file) as pdf:
         for page in pdf.pages:
-            text += page.extract_text()
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
     return text
 
-def calculate_similarity(resume_text, job_desc):
-    vectorizer = TfidfVectorizer()
-    vectors = vectorizer.fit_transform([resume_text, job_desc])
-    similarity = cosine_similarity(vectors[0:1], vectors[1:2])
-    return round(float(similarity[0][0]) * 100, 2)
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    # No score yet when first loading page
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
+
 
 @app.post("/analyze")
 async def analyze(request: Request,
@@ -33,9 +39,19 @@ async def analyze(request: Request,
                   job_description: str = Form(...)):
 
     resume_text = extract_text_from_pdf(resume.file)
-    score = calculate_similarity(resume_text, job_description)
+
+    # Semantic Similarity
+    score = semantic_similarity(resume_text, job_description)
+
+    # Skill Gap Analysis
+    matched, missing = skill_gap(resume_text, REQUIRED_SKILLS)
 
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "score": score}
+        {
+            "request": request,
+            "score": score,
+            "matched": matched,
+            "missing": missing
+        }
     )
