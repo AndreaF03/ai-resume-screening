@@ -4,13 +4,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 import pdfplumber
 
-# Import BOTH functions
 from app.ai_engine import semantic_similarity, skill_gap
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
-# Define required skills globally
 REQUIRED_SKILLS = ["python", "machine learning", "sql"]
 
 
@@ -26,7 +24,6 @@ def extract_text_from_pdf(file):
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    # No score yet when first loading page
     return templates.TemplateResponse(
         "index.html",
         {"request": request}
@@ -40,10 +37,7 @@ async def analyze(request: Request,
 
     resume_text = extract_text_from_pdf(resume.file)
 
-    # Semantic Similarity
     score = semantic_similarity(resume_text, job_description)
-
-    # Skill Gap Analysis
     matched, missing = skill_gap(resume_text, REQUIRED_SKILLS)
 
     return templates.TemplateResponse(

@@ -1,15 +1,23 @@
-from sentence_transformers import SentenceTransformer, util
+import spacy
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Load model once (important)
+nlp = spacy.load("en_core_web_sm")
+
 
 def semantic_similarity(resume_text, job_desc):
-    embeddings = model.encode([resume_text, job_desc])
-    score = util.cos_sim(embeddings[0], embeddings[1])
-    return round(float(score[0][0]) * 100, 2)
+    doc1 = nlp(resume_text)
+    doc2 = nlp(job_desc)
+
+    # If either document is empty, avoid crash
+    if not doc1.vector_norm or not doc2.vector_norm:
+        return 0.0
+
+    return round(doc1.similarity(doc2) * 100, 2)
 
 
 def skill_gap(resume_text, required_skills):
     resume_lower = resume_text.lower()
+
     matched = []
     missing = []
 
