@@ -1,18 +1,12 @@
-import spacy
-
-# Load model once (important)
-nlp = spacy.load("en_core_web_sm")
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def semantic_similarity(resume_text, job_desc):
-    doc1 = nlp(resume_text)
-    doc2 = nlp(job_desc)
-
-    # If either document is empty, avoid crash
-    if not doc1.vector_norm or not doc2.vector_norm:
-        return 0.0
-
-    return round(doc1.similarity(doc2) * 100, 2)
+    vectorizer = TfidfVectorizer(stop_words="english")
+    vectors = vectorizer.fit_transform([resume_text, job_desc])
+    similarity = cosine_similarity(vectors[0:1], vectors[1:2])
+    return round(float(similarity[0][0]) * 100, 2)
 
 
 def skill_gap(resume_text, required_skills):
